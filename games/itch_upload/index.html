@@ -1,0 +1,190 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover">
+<title>Cyber-Viper 2084</title>
+<style>
+:root{--bg:#070914;--panel:#0e1330;--line:#1d2a5c;--cy:#22d3ee;--gold:#facc15;--red:#f87171;--tx:#d7e3ff;--dim:#7d8bb8;color-scheme:dark;box-sizing:border-box;padding-top:env(safe-area-inset-top,0px);padding-bottom:env(safe-area-inset-bottom,0px)}
+@media (prefers-color-scheme:dark){:root:not([data-theme="light"]){--bg:#070914}}
+:root[data-theme="dark"]{--bg:#070914}
+*{box-sizing:inherit}[hidden]{display:none!important}
+html,body{height:100%;margin:0;background:var(--bg);color:var(--tx);font:15px/1.5 ui-monospace,Menlo,Consolas,"Courier New",monospace;-webkit-tap-highlight-color:transparent}
+#app{max-width:520px;margin:0 auto;padding:10px 12px 16px;display:flex;flex-direction:column;gap:10px}
+h1{font-size:24px;margin:4px 0;color:var(--cy);letter-spacing:.05em;text-shadow:0 0 12px #22d3ee88}
+h2{font-size:17px;margin:0;color:var(--gold)}p{margin:4px 0}
+.box{background:var(--panel);border:1px solid var(--line);border-radius:6px;padding:12px}
+button{font:inherit;color:var(--tx);background:var(--panel);border:1px solid var(--cy);border-radius:6px;padding:10px 12px;min-height:44px;cursor:pointer}
+button:active{background:var(--line)}button:focus-visible,input:focus-visible{outline:2px solid var(--gold);outline-offset:2px}
+button:disabled{opacity:.5;border-color:var(--line)}button.big{font-size:18px;background:#0a3b4d}
+input{font:inherit;width:100%;padding:12px;background:var(--bg);color:var(--tx);border:1px solid var(--cy);border-radius:6px}
+.col{display:flex;flex-direction:column;gap:8px}.row{display:flex;gap:8px}.row>*{flex:1}
+.item{display:flex;align-items:center;gap:10px;padding:4px 0}.item .n{flex:1;min-width:0}.item button{min-width:96px}
+.sw{width:54px;height:16px;border-radius:8px;border:1px solid var(--line);flex:none}
+.dim{color:var(--dim)}.gold{color:var(--gold)}.red{color:var(--red)}.cy{color:var(--cy)}
+.foot{text-align:center;font-size:12px;color:var(--dim);margin:6px 0 0}.doc p{margin:6px 0}.doc h3{font-size:15px;color:var(--cy);margin:14px 0 2px}#hud{font-size:13px}#cv{display:block;margin:0 auto;border:1px solid var(--line);border-radius:4px;touch-action:none;max-width:100%}
+#pad{display:grid;grid-template-columns:repeat(3,72px);grid-template-rows:repeat(2,60px);gap:8px;justify-content:center}
+#pad button{font-size:22px;padding:0}#pad .u{grid-column:2}#pad .l{grid-column:1;grid-row:2}#pad .d{grid-column:2;grid-row:2}#pad .r{grid-column:3;grid-row:2}
+</style>
+</head>
+<body>
+<div id="app">
+  <div id="ui"></div>
+  <div id="game" hidden class="col">
+    <div id="hud" class="box"></div>
+    <canvas id="cv"></canvas>
+    <div id="pad">
+      <button class="u" data-d="0,-1" aria-label="Up">&#9650;</button><button class="l" data-d="-1,0" aria-label="Left">&#9664;</button>
+      <button class="d" data-d="0,1" aria-label="Down">&#9660;</button><button class="r" data-d="1,0" aria-label="Right">&#9654;</button>
+    </div>
+    <div class="row" id="ctl"><button id="pause">Pause</button><button id="quit">Quit run</button></div>
+    <p class="foot">Made by Aarush Pal</p>
+  </div>
+</div>
+<script>
+const W=30,H=20,KEY="cyberviper2084v2";
+// skin = [name, cost, body color A, body color B, head color]  ("r" = rainbow)
+const SK=[["Classic Routine",0,"#22c55e","#16a34a","#86efac"],["Python Coder",120,"#3776ab","#ffd43b","#3776ab"],["Neon Runner",100,"#22d3ee","#0891b2","#a5f3fc"],
+["Phantom Packet",200,"#a855f7","#7e22ce","#e9d5ff"],["Crimson Daemon",250,"#ef4444","#991b1b","#fecaca"],["Golden Wyrm",400,"#facc15","#ca8a04","#fef08a"],
+["Ice Cobra",220,"#bae6fd","#38bdf8","#ffffff"],["Lava Viper",300,"#fb923c","#dc2626","#fde68a"],["Toxic Mamba",280,"#a3e635","#3f6212","#ecfccb"],
+["Candy Coil",260,"#f9a8d4","#ffffff","#ec4899"],["Zebra Byte",240,"#f8fafc","#1e293b","#94a3b8"],["Matrix Worm",350,"#00ff41","#003b00","#b9ffc9"],
+["Sunset Slither",380,"#f97316","#db2777","#fde047"],["Galaxy Serpent",500,"#6366f1","#1e1b4b","#c4b5fd"],["Rainbow Glitch",900,"r","r","#ffffff"]];
+const R=(a,b,c,d)=>{const o=[];for(let x=a;x<=c;x++)for(let y=b;y<=d;y++)o.push([x,y]);return o};
+// map = [name, cost, background, wall color, grid color, obstacle cells]
+const MP=[["Mainframe Grid",0,"#070914","#22d3ee","#101a3d",[]],
+["Data Pillars",150,"#0b0714","#e879f9","#1d1038",[...R(7,5,8,6),...R(21,5,22,6),...R(7,13,8,14),...R(21,13,22,14)]],
+["Firewall Corridors",300,"#140a07","#fb923c","#2e1a0e",[...R(5,6,12,6),...R(17,6,24,6),...R(5,13,12,13),...R(17,13,24,13)]],
+["Neon Cross",500,"#06130f","#4ade80","#0e2a20",[...R(14,3,15,7),...R(14,12,15,16),...R(5,9,10,10),...R(21,9,26,10)]],
+["Black ICE Maze",800,"#0a0a12","#f87171","#1c1c2c",[...R(6,4,6,10),...R(23,9,23,15),...R(10,15,18,15),...R(10,4,18,4),...R(12,8,17,8)]]];
+const OC=[100,250,500],DR=[50,100,200,350,500],TN=["Script Kiddie","Packet Sniffer","Daemon","Root Access","Black ICE","Singularity"];
+const $=id=>document.getElementById(id),ui=$("ui"),game=$("game"),cv=$("cv"),ctx=cv.getContext("2d");
+
+/* ---------- profile (localStorage, validated on load) ---------- */
+const blank=()=>({name:"",tokens:0,high:0,last:"",streak:0,own:[0],skin:0,mown:[0],map:0,oc:0,set:{m:1,s:1,v:1}});
+function load(){const p=blank();
+  try{const s=JSON.parse(localStorage.getItem(KEY)||"null");
+    if(s&&/^\w{1,12}$/.test(s.name||"")){const n=(v,a,b)=>Math.max(a,Math.min(b,Math.floor(+v)||0)),ids=(a,m)=>[...new Set([0,...(Array.isArray(a)?a:[]).map(Number).filter(i=>i>=0&&i<m)])];
+      Object.assign(p,{name:s.name,tokens:n(s.tokens,0,1e8),high:n(s.high,0,1e8),streak:n(s.streak,0,1e5),last:String(s.last||""),oc:n(s.oc,0,3),
+      own:ids(s.own,SK.length),mown:ids(s.mown,MP.length)});
+      p.skin=p.own.includes(+s.skin)?+s.skin:0;p.map=p.mown.includes(+s.map)?+s.map:0;
+      if(s.set)p.set={m:+!!s.set.m,s:+!!s.set.s,v:+!!s.set.v}}}catch(e){}
+  return p}
+const save=()=>{try{localStorage.setItem(KEY,JSON.stringify(P))}catch(e){}};
+let P=load(),note="",msg="",tab=0;
+
+/* ---------- sound (made with code, no audio files) ---------- */
+let AC;const ac=()=>AC||(AC=new(window.AudioContext||window.webkitAudioContext)());
+function tone(f,d,t="square",v=.07,at=0,mus){if(!(mus?P.set.m:P.set.s))return;
+  try{const a=ac(),o=a.createOscillator(),g=a.createGain(),s=a.currentTime+at;o.type=t;o.frequency.value=f;
+  g.gain.setValueAtTime(v,s);g.gain.exponentialRampToValueAtTime(.001,s+d);o.connect(g);g.connect(a.destination);o.start(s);o.stop(s+d)}catch(e){}}
+const vib=p=>{if(P.set.v&&navigator.vibrate)navigator.vibrate(p)};
+const NOTES=[110,0,165,0,131,0,196,165,98,0,147,0,110,131,165,0];let mi=0,mt;
+function music(on){clearInterval(mt);if(on&&P.set.m)mt=setInterval(()=>{const n=NOTES[mi++%16];if(n)tone(n,.22,"sawtooth",.04,0,1);if(n&&mi%4===0)tone(n*4,.12,"triangle",.02,0,1)},180)}
+const sfx={eat:()=>{tone(660,.08);tone(880,.1,"square",.07,.07)},gold:()=>[660,880,1100,1320].forEach((f,i)=>tone(f,.12,"triangle",.09,i*.07)),
+ die:()=>[300,220,150,90].forEach((f,i)=>tone(f,.2,"sawtooth",.09,i*.12)),tier:()=>[523,659,784,1047].forEach((f,i)=>tone(f,.15,"triangle",.09,i*.09)),click:()=>tone(440,.05)};
+
+/* ---------- daily login ---------- */
+const today=()=>{const d=new Date();return d.getFullYear()+"-"+String(d.getMonth()+1).padStart(2,"0")+"-"+String(d.getDate()).padStart(2,"0")};
+const dn=s=>{const m=/^(\d+)-(\d+)-(\d+)$/.exec(s);return m?Date.UTC(+m[1],+m[2]-1,+m[3])/864e5:NaN};
+function daily(){const t=today();if(P.last===t)return;P.streak=dn(t)-dn(P.last)===1?P.streak+1:1;P.last=t;
+  const r=DR[Math.min(P.streak,5)-1];P.tokens+=r;save();note=`Daily login bonus: Day ${P.streak}, +${r} tokens. Tomorrow: +${DR[Math.min(P.streak+1,5)-1]}.`}
+
+/* ---------- screens ---------- */
+function screen(h){music(false);game.hidden=true;ui.hidden=false;ui.innerHTML=h;sfx.click()}
+const grad=s=>s[2]==="r"?"linear-gradient(90deg,red,orange,yellow,lime,cyan,violet)":`linear-gradient(90deg,${s[2]},${s[3]})`;
+function welcome(){screen(`<h1>CYBER-VIPER 2084</h1><div class="box"><p>2084. The MegaCorp mainframe AEGIS hides the world's secrets inside encrypted data cores. You are a rogue AI routine, a Viper. Eat cores, grow, and survive the grid.</p></div>
+<div class="box col"><label for="nm">Your handle (1-12 letters, digits or _)</label><input id="nm" maxlength="12" autocomplete="off" autocapitalize="off">
+<p id="err" class="red" hidden>Use 1-12 letters, digits or underscores.</p><button class="big" onclick="setName()">Jack in</button><p class="dim" style="font-size:12px">Use a nickname, not your real name. By playing you agree to the Rules, Terms and Privacy Policy (Settings).</p></div>`)}
+function setName(){const v=$("nm").value.trim();if(!/^\w{1,12}$/.test(v)){$("err").hidden=false;return}P.name=v;save();daily();menu()}
+function menu(){screen(`<h1>CYBER-VIPER 2084</h1>${note?`<div class="box gold">${note}</div>`:""}
+<div class="box"><p>Operator: <b>${P.name}</b></p><p>Tokens: <span class="gold">${P.tokens}</span> &nbsp; High score: ${P.high}</p>
+<p>Streak: ${P.streak} day(s) &nbsp; Map: ${MP[P.map][0]}</p><p>Skin: ${SK[P.skin][0]}</p></div>
+<div class="col"><button class="big" onclick="start()">Play</button><button onclick="shop()">Black Market</button><button onclick="settings()">Settings</button><button onclick="brief()">Briefing</button></div><p class="foot">Designed, coded &amp; made by Aarush Pal</p>`);note=""}
+function brief(){screen(`<h2>Briefing</h2><div class="box"><p><span style="color:#e879f9">&#9679;</span> Data core: +10 score, +2 tokens</p>
+<p><span class="gold">&#9733;</span> Golden core (10% chance, vanishes in a few seconds): +50 score, +10 tokens</p>
+<p>Eat cores within 4 seconds of each other to build a combo (up to +100% score).</p><p>Every 100 points: new tier, +5 tokens, faster grid.</p>
+<p>Walls, obstacles and your own tail end the run. Log in daily: 50 tokens on Day 1 up to 500 on Day 5+. Skip a day and the streak resets.</p></div><button onclick="menu()">Back</button>`)}
+function settings(){const o=(k,l)=>`<button onclick="tg('${k}')">${l}: ${P.set[k]?"ON":"OFF"}</button>`;
+  screen(`<h2>Settings</h2><div class="col">${o("m","Music")}${o("s","Sound effects")}${o("v","Vibration")}</div>
+<p class="dim">Vibration works on most Android phones. iPhones do not support it in browsers.</p><div class="col"><button onclick="rules()">Rules</button><button onclick="privacy()">Privacy Policy</button><button onclick="terms()">Terms of Use</button><button onclick="credits()">Credits</button></div><button onclick="menu()">Back</button>`)}
+function doc(t,b){screen(`<h2>${t}</h2><div class="box doc">${b}</div><button onclick="settings()">Back</button>`)}
+function credits(){doc("Credits",`<p><b>Cyber-Viper 2084</b></p><p>Designed, coded &amp; made by <b>Aarush Pal</b></p><p>All sounds and music are generated live in your browser. No outside images or audio files are used.</p><p>The "Python Coder" skin only uses blue and yellow colors. This game is not affiliated with the Python Software Foundation.</p><p class="dim">&copy; 2026 Aarush Pal. All rights reserved.</p>`)}
+function rules(){doc("Rules",`<h3>How to play</h3><p>Steer with swipes, the arrow buttons or W A S D. Eat cores to grow longer.</p><h3>A run ends when</h3><p>You hit a wall, an obstacle or your own tail.</p><h3>Scoring</h3><p>Core: +10 score, +2 tokens. Golden core: +50 score, +10 tokens. Combos and Overclock raise your score.</p><h3>Fair play</h3><p>Tokens are in-game points only. They have no real-world value and cannot be bought, sold or exchanged. Please do not edit saved data to cheat.</p><h3>Take breaks</h3><p>Rest your eyes and hands from time to time.</p>`)}
+function privacy(){doc("Privacy Policy",`<p class="dim">Last updated: October 2026</p><h3>What we collect</h3><p>Nothing. Cyber-Viper 2084 has no accounts, no ads, no analytics, and it does not send your data to any server.</p><h3>What is saved on your device</h3><p>Your nickname, tokens, high score, login streak, owned skins and maps, and settings are saved in your browser's local storage. This data stays on your device. Clearing browser data deletes it.</p><h3>Personal information</h3><p>The game never asks for your real name, email or location. Please use a nickname.</p><h3>Third parties</h3><p>If you play on a website or store such as itch.io, that platform may collect its own data under its own policy.</p><h3>Contact</h3><p>Questions: palaarush56@gmail.com</p>`)}
+function terms(){doc("Terms of Use",`<h3>Use</h3><p>The game is free and provided "as is", without any warranty. Progress may be lost if browser data is cleared.</p><h3>No real money</h3><p>Nothing in the game is bought with real money. Tokens, skins and maps are virtual items with no cash value.</p><h3>Ownership</h3><p>Code, design and story are &copy; 2026 Aarush Pal. You may play for personal use. Please do not copy or resell the game without permission.</p><h3>Changes</h3><p>These terms and policies may be updated over time.</p>`)}
+function tg(k){P.set[k]=+!P.set[k];save();settings()}
+function shop(){let h=`<h2>Black Market</h2><p>Tokens: <span class="gold">${P.tokens}</span></p><div class="row"><button onclick="tab=0;shop()" ${tab==0?"disabled":""}>Skins</button><button onclick="tab=1;shop()" ${tab==1?"disabled":""}>Maps</button><button onclick="tab=2;shop()" ${tab==2?"disabled":""}>Perks</button></div><div class="box">`;
+  if(tab==0)SK.forEach((s,i)=>{const o=P.own.includes(i),e=P.skin===i;h+=`<div class="item"><span class="sw" style="background:${grad(s)}"></span><span class="n">${s[0]}</span><button onclick="buy(0,${i})" ${e?"disabled":""}>${e?"Equipped":o?"Equip":"Buy "+s[1]}</button></div>`});
+  if(tab==1)MP.forEach((m,i)=>{const o=P.mown.includes(i),e=P.map===i;h+=`<div class="item"><span class="sw" style="background:${m[2]};border-color:${m[3]}"></span><span class="n">${m[0]}</span><button onclick="buy(1,${i})" ${e?"disabled":""}>${e?"Selected":o?"Select":"Buy "+m[1]}</button></div>`});
+  if(tab==2){const mx=P.oc>=3;h+=`<div class="item"><span class="n">Overclock Lv ${P.oc}/3<br><span class="dim">Faster snake, +25% score per level</span></span><button onclick="buy(2,0)" ${mx?"disabled":""}>${mx?"Max":"Buy "+OC[P.oc]}</button></div>`}
+  screen(h+`</div><p class="gold">${msg}</p><button onclick="msg='';menu()">Back</button>`)}
+function buy(t,i){const it=t==0?SK[i]:t==1?MP[i]:null,own=t==0?P.own:P.mown,c=t==2?OC[P.oc]:it[1];
+  if(t<2&&own.includes(i)){t==0?P.skin=i:P.map=i;msg="Equipped."}
+  else if(P.tokens>=c){P.tokens-=c;if(t==2)P.oc++;else{own.push(i);t==0?P.skin=i:P.map=i}msg="Purchased!";sfx.tier()}
+  else msg="Not enough tokens.";save();shop()}
+
+/* ---------- gameplay ---------- */
+let sn,dir,last,food,score,earned,timer,running,paused,combo,lastEat,walls,tierPrev;
+const tier=()=>Math.min(Math.floor(score/100),5),delay=()=>Math.max(50,150-tier()*8-P.oc*12);
+function spawn(){const f=[];for(let y=1;y<H-1;y++)for(let x=1;x<W-1;x++)if(!walls.has(x+y*W)&&!sn.some(s=>s.x===x&&s.y===y))f.push({x,y});
+  food=f.length?Object.assign(f[Math.floor(Math.random()*f.length)],{g:Math.random()<.1,t:60}):null}
+function start(){walls=new Set(MP[P.map][5].map(c=>c[0]+c[1]*W));sn=[{x:15,y:10},{x:14,y:10},{x:13,y:10}];dir=last={x:1,y:0};
+  score=0;earned=0;combo=0;lastEat=0;tierPrev=0;paused=false;spawn();running=true;ui.hidden=true;game.hidden=false;size();$("pause").textContent="Pause";
+  draw();clearTimeout(timer);timer=setTimeout(tick,delay());music(true)}
+const turn=(dx,dy)=>{if(dx===-last.x&&dy===-last.y)return;dir={x:dx,y:dy}};
+function tick(){if(!running||paused)return;last=dir;const h={x:sn[0].x+dir.x,y:sn[0].y+dir.y};
+  if(h.x<=0||h.y<=0||h.x>=W-1||h.y>=H-1||walls.has(h.x+h.y*W))return over("Firewall breach: routine terminated.");
+  const eat=food&&h.x===food.x&&h.y===food.y,n=sn.length-(eat?0:1);
+  for(let i=0;i<n;i++)if(sn[i].x===h.x&&sn[i].y===h.y)return over("Self-corruption: you bit your own code.");
+  sn.unshift(h);if(!eat)sn.pop();
+  if(food&&food.g&&--food.t<=0)spawn();
+  if(eat){const now=Date.now();combo=now-lastEat<4000?combo+1:0;lastEat=now;
+    const b=food.g?50:10,t=food.g?10:2;score+=Math.floor(b*(1+P.oc*.25)*(1+Math.min(combo,4)*.25));P.tokens+=t;earned+=t;
+    food.g?sfx.gold():sfx.eat();vib(food.g?[30,40,30]:20);spawn();
+    if(!food)return over("Mainframe fully consumed. Perfect run!");
+    if(tier()>tierPrev){tierPrev=tier();P.tokens+=5;earned+=5;sfx.tier();vib(60)}}
+  draw();timer=setTimeout(tick,delay())}
+function over(reason){running=false;clearTimeout(timer);music(false);sfx.die();vib([80,40,120]);draw();
+  const nh=score>P.high;if(nh)P.high=score;save();
+  ui.hidden=false;ui.innerHTML=`<h2 class="red">Connection severed</h2><div class="box"><p>${reason}</p><p>Score: ${score} ${nh?'<span class="gold">New high score!</span>':""}</p>
+<p>Tier ${tier()+1} (${TN[tier()]}) &nbsp; Length ${sn.length}</p><p>Tokens earned: +${earned} (balance ${P.tokens})</p></div>
+<div class="row"><button class="big" onclick="start()">Play again</button><button onclick="menu()">Main menu</button></div>`;
+  $("pad").hidden=true;$("ctl").hidden=true;game.hidden=false}
+$("quit").onclick=()=>{if(running)over("Manual disconnect.")};
+function pause(){if(!running)return;paused=!paused;$("pause").textContent=paused?"Resume":"Pause";music(!paused);if(paused)clearTimeout(timer);else timer=setTimeout(tick,delay())}
+$("pause").onclick=pause;
+
+/* ---------- drawing (canvas, no images needed) ---------- */
+let cs=14;
+function size(){$("pad").hidden=false;$("ctl").hidden=false;cs=Math.max(8,Math.floor(Math.min(496,innerWidth-24)/W));cv.width=cs*W;cv.height=cs*H}
+addEventListener("resize",()=>{if(!game.hidden&&sn){size();draw()}});
+function rr(x,y,w,h,r){ctx.beginPath();ctx.roundRect?ctx.roundRect(x,y,w,h,r):ctx.rect(x,y,w,h);ctx.fill()}
+function draw(){const m=MP[P.map],s=SK[P.skin],c=cs;
+  ctx.fillStyle=m[2];ctx.fillRect(0,0,cv.width,cv.height);ctx.strokeStyle=m[4];ctx.lineWidth=1;ctx.beginPath();
+  for(let x=1;x<W;x++){ctx.moveTo(x*c+.5,0);ctx.lineTo(x*c+.5,H*c)}for(let y=1;y<H;y++){ctx.moveTo(0,y*c+.5);ctx.lineTo(W*c,y*c+.5)}ctx.stroke();
+  ctx.fillStyle=m[3];ctx.shadowColor=m[3];ctx.shadowBlur=c/2;
+  for(let x=0;x<W;x++)for(let y=0;y<H;y++)if(x===0||y===0||x===W-1||y===H-1||walls.has(x+y*W))rr(x*c+1,y*c+1,c-2,c-2,c/5);
+  ctx.shadowBlur=0;
+  if(food){const px=food.x*c+c/2,py=food.y*c+c/2;ctx.fillStyle=food.g?"#facc15":"#e879f9";ctx.shadowColor=ctx.fillStyle;ctx.shadowBlur=c;ctx.beginPath();
+    ctx.arc(px,py,c*(food.g?.42:.32)+Math.sin(Date.now()/150)*c*.05,0,7);ctx.fill();ctx.shadowBlur=0;
+    if(food.g){ctx.strokeStyle="#fff";ctx.lineWidth=2;ctx.beginPath();ctx.arc(px,py,c*.5,-1.57,-1.57+6.28*food.t/60);ctx.stroke()}}
+  for(let i=sn.length-1;i>=0;i--){const p=sn[i];let col;
+    if(i===0)col=s[4];else col=s[2]==="r"?`hsl(${(i*22+Date.now()/8)%360},90%,60%)`:(i%2?s[3]:s[2]);
+    ctx.fillStyle=col;rr(p.x*c+1,p.y*c+1,c-2,c-2,i?c/3:c/2.4)}
+  const h=sn[0],px=h.x*c+c/2,py=h.y*c+c/2;ctx.fillStyle="#000";
+  [-1,1].forEach(k=>{ctx.beginPath();ctx.arc(px+dir.x*c*.12-dir.y*k*c*.2,py+dir.y*c*.12+dir.x*k*c*.2,c*.09,0,7);ctx.fill()});
+  $("hud").innerHTML=`<span class="cy">${P.name}</span> &nbsp; Tier ${tier()+1} [${TN[tier()]}] &nbsp; ${m[0]}<br>
+Score ${score} &nbsp; High ${Math.max(score,P.high)} &nbsp; Streak ${P.streak}d &nbsp; Tokens <span class="gold">${P.tokens}</span>${combo>0?` &nbsp; <span class="gold">Combo x${combo+1}</span>`:""}`}
+
+/* ---------- input ---------- */
+document.querySelectorAll("#pad button").forEach(b=>b.addEventListener("pointerdown",e=>{e.preventDefault();const[a,c]=b.dataset.d.split(",").map(Number);turn(a,c)}));
+let t0=null;cv.addEventListener("touchstart",e=>{const t=e.touches[0];t0={x:t.clientX,y:t.clientY}},{passive:true});
+cv.addEventListener("touchend",e=>{if(!t0)return;const t=e.changedTouches[0],a=t.clientX-t0.x,b=t.clientY-t0.y;t0=null;
+  if(Math.max(Math.abs(a),Math.abs(b))<20)return;Math.abs(a)>Math.abs(b)?turn(a>0?1:-1,0):turn(0,b>0?1:-1)});
+addEventListener("keydown",e=>{if(!running)return;const k=e.key.toLowerCase(),m={w:[0,-1],arrowup:[0,-1],s:[0,1],arrowdown:[0,1],a:[-1,0],arrowleft:[-1,0],d:[1,0],arrowright:[1,0]};
+  if(m[k]){e.preventDefault();turn(...m[k])}else if(k==="x")over("Manual disconnect.");else if(k==="p"||k===" "){e.preventDefault();pause()}});
+document.addEventListener("visibilitychange",()=>{if(document.hidden&&running&&!paused)pause()});
+if(P.name){daily();menu()}else welcome();
+</script>
+</body>
+</html>
