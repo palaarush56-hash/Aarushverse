@@ -1,27 +1,53 @@
 
- // ===== EDIT THIS FILE to change site info and add projects =====
+ // ===== AARUSHVERSE SITE INFO AND PROJECTS =====
+
 export const site = {
   name: 'AARUSHVERSE',
-  description: 'Games, experiments and digital experiences by an independent creator.',
-  fanDisclaimer: 'This is an unofficial fan-made project and is not affiliated with or endorsed by the original rights holders.',
+
+  description:
+    'Games, web projects, experiments and digital experiences created by Aarush.',
+
+  fanDisclaimer:
+    'This is an unofficial fan-made project and is not affiliated with or endorsed by the original rights holders.',
+
   social: {
     itch: 'https://aarushpal.itch.io',
-    github: '',
+    github: 'https://github.com/palaarush56-hash',
     youtube: '',
-    instagram: '',
+    instagram: 'https://www.instagram.com/aarushpal_official.17/',
     email: ''
   },
+
   about: {
-    intro: 'PLACEHOLDER: Write a short introduction about yourself here.',
-    interests: 'PLACEHOLDER: Describe your game development interests.',
-    technologies: ['HTML5', 'CSS', 'JavaScript'],
-    goals: 'PLACEHOLDER: Describe your current goals.',
-    philosophy: 'PLACEHOLDER: Describe your project philosophy.'
+    intro:
+      'Hi! I am Aarush, a young developer who enjoys building websites, browser games and creative digital projects. Aarushverse is my personal space to share what I create and what I learn along the way.',
+
+    interests:
+      'I enjoy web development, browser game creation, interactive experiences, creative coding and exploring new AI tools. I like turning ideas into real projects and experimenting with new designs.',
+
+    technologies: [
+      'HTML5',
+      'CSS3',
+      'JavaScript',
+      'Python',
+      'Responsive Design'
+    ],
+
+    goals:
+      'My goal is to improve my coding skills, create more original games, build modern websites and develop projects that people can explore and enjoy.',
+
+    philosophy:
+      'Learn by building, experiment with ideas, solve problems and keep improving. Every project is an opportunity to learn something new.'
   },
-  ads: { enabled: false, provider: null }
+
+  ads: {
+    enabled: false,
+    provider: null
+  }
 };
 
-/* Project fields */
+/* ===== PROJECTS ===== */
+
 export const projects = [
   {
     id: 'cyber-viper-2084',
@@ -32,7 +58,8 @@ export const projects = [
     featured: true,
     playMode: 'local',
     localGamePath: 'games/itch_upload/index.html',
-    description: 'A browser game by Aarush, hosted on itch.io. Open the game page to play.',
+    description:
+      'A browser game by Aarush. Explore the game and enjoy the arcade-style experience.',
     coverImage: 'images/cyber-viper.jpg'
   },
 
@@ -45,7 +72,8 @@ export const projects = [
     featured: true,
     playMode: 'local',
     localGamePath: 'games/dashextrem.netlify.html',
-    description: 'Play DashExtrem, a fast-paced browser game.',
+    description:
+      'Play DashExtreme, a fast-paced browser game built for an exciting arcade experience.',
     coverImage: 'images/dash-extreme.jpg'
   },
 
@@ -58,7 +86,8 @@ export const projects = [
     sample: true,
     technologies: ['JavaScript'],
     lastUpdated: '2026-01-01',
-    description: 'Placeholder with no destination yet.'
+    description:
+      'An experimental project concept. More details will be added as development progresses.'
   },
 
   {
@@ -70,8 +99,14 @@ export const projects = [
     featured: true,
     playMode: 'local',
     localGamePath: 'Project/starbuks/index.html',
-    description: 'A responsive front-end landing page clone of Starbucks built using pure HTML5 and CSS3. Created to practice modern UI layout techniques, Flexbox, custom typography, and clean web styling. Note: This is a static front-end UI design created for layout and CSS practice. Interactive ordering and backend features are not included.',
-    technologies: ['HTML5', 'CSS3', 'Responsive Design', 'UI Clone'],
+    description:
+      'A responsive Starbucks-inspired landing page built with HTML5 and CSS3. This project helped me practice page layouts, Flexbox, typography and modern web styling. It is a static front-end practice project and does not include real ordering or backend functionality.',
+    technologies: [
+      'HTML5',
+      'CSS3',
+      'Responsive Design',
+      'UI Design'
+    ],
     coverImage: ''
   },
 
@@ -81,7 +116,8 @@ export const projects = [
     type: 'fan',
     status: 'Concept',
     sample: true,
-    description: 'Placeholder concept-only fan page.'
+    description:
+      'A fan-made concept project. This entry is a placeholder for a future creative idea.'
   },
 
   {
@@ -90,6 +126,9 @@ export const projects = [
     type: 'upcoming',
     status: 'Concept',
     sample: true,
-    description: 'Placeholder. Add releaseDate or progress only when real.'
+    description:
+      'A future project idea. Details will be added when development begins.'
   }
 ];
+
+
