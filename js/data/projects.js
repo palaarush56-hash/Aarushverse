@@ -129,6 +129,19 @@ export const projects = [
     description:
       'A future project idea. Details will be added when development begins.'
   }
-];
+
+  {
+    id: 'cyber-run',
+    title: 'Cyber Run',
+    type: 'game',
+    category: 'Arcade',
+    status: 'Released',
+    featured: true,
+    playMode: 'local',
+    localGamePath: 'Cyber Run.html',
+    description: 'Run, jump and collect coins in Cyber Run, a neon arcade game.',
+    coverImage: 'images/cyber-run.jpg'
+  },
+
 
 
