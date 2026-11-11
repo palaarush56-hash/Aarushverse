@@ -128,7 +128,7 @@ export const projects = [
     sample: true,
     description:
       'A future project idea. Details will be added when development begins.'
-  }
+  },
 
   {
     id: 'cyber-run',
