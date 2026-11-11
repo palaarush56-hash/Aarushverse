@@ -143,5 +143,5 @@ export const projects = [
     coverImage: 'images/cyber-run.jpg'
   },
 
-
+];
 
