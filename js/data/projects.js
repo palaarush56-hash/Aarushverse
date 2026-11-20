@@ -120,7 +120,6 @@ export const projects = [
       'A fan-made concept project. This entry is a placeholder for a future creative idea.'
   },
 
-  },
 
    {
     id: 'dungeon-ascent',
