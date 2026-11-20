@@ -120,28 +120,8 @@ export const projects = [
       'A fan-made concept project. This entry is a placeholder for a future creative idea.'
   },
 
-  {
-    id: 'sample-upcoming',
-    title: 'Sample Upcoming Project',
-    type: 'upcoming',
-    status: 'Concept',
-    sample: true,
-    description:
-      'A future project idea. Details will be added when development begins.'
   },
 
-  {
-    id: 'cyber-run',
-    title: 'Cyber Run',
-    type: 'game',
-    category: 'Arcade',
-    status: 'Released',
-    featured: true,
-    playMode: 'local',
-    localGamePath: 'Cyber Run.html',
-    description: 'Run, jump and collect coins in Cyber Run, a neon arcade game.',
-    coverImage: 'images/cyber-run.jpg'
-  },
    {
     id: 'dungeon-ascent',
     title: 'Dungeon Ascent',
