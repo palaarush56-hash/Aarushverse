@@ -142,6 +142,18 @@ export const projects = [
     description: 'Run, jump and collect coins in Cyber Run, a neon arcade game.',
     coverImage: 'images/cyber-run.jpg'
   },
+   {
+    id: 'dungeon-ascent',
+    title: 'Dungeon Ascent',
+    type: 'game',
+    category: 'Arcade',
+    status: 'Released',
+    featured: true,
+    playMode: 'local',
+    localGamePath: 'games/Dungeon Ascent.html',
+    description: 'Climb through the dungeon, collect coins and avoid the spikes in this platform adventure.',
+    coverImage: ''
+  },
 
 ];
 
