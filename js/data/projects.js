@@ -152,7 +152,7 @@ export const projects = [
     playMode: 'local',
     localGamePath: 'games/Dungeon Ascent.html',
     description: 'Climb through the dungeon, collect coins and avoid the spikes in this platform adventure.',
-    coverImage: ''
+    coverImage: 'images/Dungeon Ascent_ Hero’s Leap.png'
   },
 
 ];
